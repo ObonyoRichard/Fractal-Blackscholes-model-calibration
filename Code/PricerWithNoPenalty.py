@@ -1,6 +1,12 @@
+'''
+This gateway module defines the Vanilla pricer with MSE loss function and its training loop        
+'''
+
 import torch
-from Code.DataLoading import fBMDataset
-from Code.ModelVectors import trainFile, valFile
+from Validations import validate
+from DataLoading import fBMDataset
+from ModelVectors import trainFile, valFile
+from Diagnostics import plotPredictions, getTrainAndValOutputs
 
 #------------------ Parameters -----------------------
 
@@ -8,22 +14,12 @@ ModelLoadPath = "----------"
 
 #----------------- Helper functions ------------------
 
-def validate(model, val_loader):
-  ''' Method which accepts the model as well as the validation data loader and logs the validation loss '''
-  loss_val = 0.0
-  with torch.no_grad():
-    for Xs, Ys in val_loader:
-      Xs = Xs.to(device=device)
-      Ys = Ys.float().to(device=device)        
-      outputs = model(Xs)
-      loss_val += loss_fn(outputs, Ys.view(-1,1)).item()
-  print(f"Validation Loss {round(loss_val/len(val_loader),5)}")
-
 def training_loop_mse(n_epochs, optimizer, model, loss_fn, train_loader, val_loader):
   ''' Method to execute the training '''
   for epoch in range(1, n_epochs + 1):
     loss_train = 0.0
     for Xs, Ys in train_loader:
+      print(Xs.requires_grad)
       Xs = Xs.to(device=device)
       Ys = Ys.float().to(device=device)
       outputs = model(Xs)
@@ -33,7 +29,7 @@ def training_loop_mse(n_epochs, optimizer, model, loss_fn, train_loader, val_loa
       optimizer.step()
       loss_train += loss.item()
     print(f'{datetime.datetime.now()} Epoch {epoch} \nTraining Loss {round(loss_train/len(train_loader),5)}')
-    validate(model, val_loader)
+    validate(model, val_loader, loss_fn)
 
 device = (torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu'))
 print(f"Training on device {device}.")
@@ -52,8 +48,9 @@ trainLoader = torch.utils.data.DataLoader(trainDataSet, 64, shuffle= True)
 valLoader = torch.utils.data.DataLoader(valDataSet, 64, shuffle= True)
 loss_fn = nn.MSELoss()
 
-model.load_state_dict(torch.load("<s", map_location=device))
+model.load_state_dict(torch.load("<ModelLoadPath>", map_location=device))
 
 #-------- Plot the predictions -----------------------------
 
+yActualTrain, yActualVal, yPredTrain, yPredVal = getTrainAndValOutputs( model, trainLoader, valLoader)
 plotPredictions(yActualTrain, yActualVal, yPredTrain, yPredVal)

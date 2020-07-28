@@ -1,3 +1,8 @@
+'''
+This module attempts to plot the activations considered for the Neural Networks
+'''
+
+import torch
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
 

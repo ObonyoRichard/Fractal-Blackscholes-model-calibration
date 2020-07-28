@@ -1,3 +1,8 @@
+'''
+This module houses the basic template of the Pricer/Inverse Map neural networks along with the
+diagnostic logging method      
+'''
+
 import torch.nn as nn
 import torch.nn.functional as F
 
