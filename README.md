@@ -8,7 +8,7 @@ Exploring and comparing calibration techniques of fractional Black Scholes Model
 
 2. Experiments folder houses 2 classes ipython notebooks using components formally explained in Code directory
 > Calibration.ipynb shows the experiments done for Pricers, Inverse Map and Inference<br>
-> Modelling.ipynb shows the baseline estimations for model parameters and checking with market data
+> Hurst exponent-{stock}.ipynb shows the baseline estimations and market data analysis for model parameters corresponding to the particular stock
 
 3. Pictures directory shows the various images pertaining to implementation used in the Project reports.
 
