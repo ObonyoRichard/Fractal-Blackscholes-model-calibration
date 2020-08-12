@@ -57,6 +57,18 @@ def createDataFile( dataFile, data ):
   pd.DataFrame(data).to_csv(dataFile, header = ["S","r","τ","σ","H","C"], index = None)
   print(f"File <{dataFile}> created with {len(data)} entries")
 
+def createTestData( dataSize, H, σ ):
+  ''' Create <dataSize> number of fBSM entries in the <dataFile> '''
+  i, data = 0, np.zeros((dataSize,7))
+  while i < dataSize:
+    SbyK,K,r,τ = randSbyK(),randK(),randR(),randτ()
+    S = SbyK*K
+    C = Cf(S,K,r,τ,σ,H)
+    if C < 0.001: continue
+    data[i,:] = [S,K,r,τ,σ,H,C]
+    i += 1
+  return pd.DataFrame(data, columns=columns)
+
 #----------------- The main activity --------------------------
 
 data = createData( totalSize )

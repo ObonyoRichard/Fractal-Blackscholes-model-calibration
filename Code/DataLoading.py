@@ -1,5 +1,5 @@
 '''
-This module handles all the torch DataSets needed for training various neural networks        
+This module handles all the torch DataSet classes needed for training various neural networks        
 '''
 
 import torch
@@ -38,18 +38,34 @@ class fBMDatasetWithK(Dataset):
         Y = item[-1]
         return X, Y
 
-class fBMDatasetInverse(Dataset):
+class fBMDatasetInverseChain(Dataset):
     
-    def __init__(self, data_path, cann_path ):
-        original = pd.read_csv(data_path)
+    def __init__(self, data_path, cann_path, inverse_path ):
+        original = pd.read_csv(data_path)[["S","r","K","τ"]]
         cann = pd.read_csv(cann_path)
-        self.data = pd.concat([cann, original], axis=1).drop(["C"], axis=1)
+        self.inverse = pd.read_csv(inverse_path)
+        self.data = pd.concat([cann, original], axis=1)
         
     def __len__(self):
         return len(self.data)
     
     def __getitem__(self, index):
         item = self.data.iloc[index, :]
-        X = torch.from_numpy(item[:-2].values).float()
-        Y = torch.from_numpy(item[-2:].values).float()
+        X = torch.from_numpy(item.values).float()
+        Y = torch.tensor(self.inverse.iloc[index]).float()
         return X, Y
+
+class fBMDatasetInference(Dataset):
+    
+    def __init__(self, testData ):
+        self.data = testData[['C','S','r','K','τ']]
+        self.data = (self.data - tMeans)/tStds
+        self.data['C'] = self.data['C'] - minC - 0.5
+
+    def __len__(self):
+        return len(self.data)
+    
+    def __getitem__(self, index):
+        item = self.data.iloc[index, :]
+        X = torch.from_numpy(item.values).float()
+        return X, X
